@@ -1,0 +1,25 @@
+[project]
+name = "factfence"
+version = "0.1.0"
+description = "Check the numbers in AI-generated prose against their cited sources"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "techdevfun" }]
+keywords = ["fact-check", "citations", "ai", "cli", "writing"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Text Processing",
+    "Topic :: Utilities",
+]
+
+[project.scripts]
+factfence = "factfence.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/techdevfun/factfence"
+Issues = "https://github.com/techdevfun/factfence/issues"
+
+[tool.setuptools]
+packages = ["factfence"]
