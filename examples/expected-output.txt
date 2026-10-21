@@ -1,0 +1,43 @@
+[✓ SUPPORTED]
+  According to the 2026 State of DevTools Survey, 73% of developers say AI-
+  generated code needs human review before merging
+  ([survey](http://127.0.0.1:18347/source-a.html)).
+    ↳ http://127.0.0.1:18347/source-a.html
+      HTTP 200, matched 73%
+    cited page contains 73%
+
+[✓ SUPPORTED]
+  The same report puts the average cost of a data breach at $4.2 million,
+  which is why review gates matter (http://127.0.0.1:18347/source-a.html).
+    ↳ http://127.0.0.1:18347/source-a.html
+      HTTP 200, matched $4.2million
+    cited page contains $4.2million
+
+[? UNVERIFIED]
+  Some teams claim 99.9% of AI suggestions are production-ready, citing an
+  internal study (http://127.0.0.1:18347/source-b.html).
+    ↳ http://127.0.0.1:18347/source-b.html
+      HTTP 200
+    cited page(s) fetched but contain none of the claim's numbers
+
+[✗ BROKEN]
+  One widely shared post says breaches cost $9.8 million on average, but
+  links to a page that no longer exists
+  (http://127.0.0.1:18347/missing.html).
+    ↳ http://127.0.0.1:18347/missing.html
+      HTTP 404
+    all 1 citation(s) failed: HTTP 404
+
+[! UNCITED]
+  It is often repeated that 60% of all code will be AI-written by 2027,
+  though nobody cites a source.
+    quantitative claim with no citation — verify by hand
+
+[~ CITED]
+  Studies show developers prefer dark mode themes
+  ([blog](http://127.0.0.1:18347/source-b.html)).
+    ↳ http://127.0.0.1:18347/source-b.html
+      HTTP 200
+    1 citation(s) resolve; nothing numeric to cross-check
+
+6 claim(s) checked: 2 supported, 1 cited, 1 unverified, 1 broken, 1 uncited. 3 need review.
