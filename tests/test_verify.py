@@ -30,6 +30,22 @@ class VerdictTest(unittest.TestCase):
         self.assertEqual(result.verdict, "SUPPORTED")
         self.assertIn("73%", result.detail)
 
+    def test_supported_when_page_uses_spelled_out_form(self):
+        claims = extract_claims("Revenue grew $10 million (https://a.example/r).")
+        result = verify_claim(claims[0], fake_fetch({
+            "https://a.example/r": ok("https://a.example/r",
+                                      "revenue grew $10 million last year"),
+        }))
+        self.assertEqual(result.verdict, "SUPPORTED")
+
+    def test_supported_when_page_spells_out_percent(self):
+        claims = extract_claims("Adoption hit 42% (https://a.example/r).")
+        result = verify_claim(claims[0], fake_fetch({
+            "https://a.example/r": ok("https://a.example/r",
+                                      "adoption hit 42 percent of teams"),
+        }))
+        self.assertEqual(result.verdict, "SUPPORTED")
+
     def test_unverified(self):
         claims = extract_claims("Growth was 99.9% (https://a.example/r).")
         result = verify_claim(claims[0], fake_fetch({
