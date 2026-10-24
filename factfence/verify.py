@@ -20,7 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable
 
-from .extract import Claim
+from .extract import Claim, normalize_number
 from .fetch import FetchResult, fetch_text
 
 
@@ -42,7 +42,12 @@ class ClaimResult:
 
 
 def _page_supports(page_text: str, numbers: list[str]) -> list[str]:
-    return [n for n in numbers if n and n in page_text]
+    # Claim numbers are stored normalized (no spaces or commas, lowercase,
+    # "42%" not "42 percent") while fetched page text is raw. Normalize
+    # the page the same way, or a page that says "$10 million" would never
+    # match the "$10million" signature — a false UNVERIFIED.
+    norm_page = normalize_number(page_text)
+    return [n for n in numbers if n and n in norm_page]
 
 
 def verify_claim(
