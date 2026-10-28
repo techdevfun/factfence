@@ -53,6 +53,23 @@ class VerdictTest(unittest.TestCase):
         }))
         self.assertEqual(result.verdict, "UNVERIFIED")
 
+    def test_suffix_of_larger_number_is_not_supported(self):
+        # "2%" inside "12%", "5million" inside "15million" and "3x"
+        # inside "13x" used to report SUPPORTED for a different number.
+        cases = [
+            ("Growth was 2% (https://a.example/r).", "growth was 12% last year"),
+            ("Sales rose 5 million (https://a.example/r).",
+             "sales rose 15 million last year"),
+            ("Output grew 3x (https://a.example/r).", "output grew 13x last year"),
+            ("Growth was 73% (https://a.example/r).", "growth was 1.73% last year"),
+        ]
+        for text, page in cases:
+            claims = extract_claims(text)
+            result = verify_claim(claims[0], fake_fetch({
+                "https://a.example/r": ok("https://a.example/r", page),
+            }))
+            self.assertEqual(result.verdict, "UNVERIFIED", text)
+
     def test_broken(self):
         claims = extract_claims("Growth was 73% (https://a.example/r).")
         result = verify_claim(claims[0], fake_fetch({}))
