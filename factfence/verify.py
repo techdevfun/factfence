@@ -17,6 +17,7 @@ mode of confident numbers with dead, irrelevant, or missing citations.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Callable
 
@@ -46,8 +47,25 @@ def _page_supports(page_text: str, numbers: list[str]) -> list[str]:
     # "42%" not "42 percent") while fetched page text is raw. Normalize
     # the page the same way, or a page that says "$10 million" would never
     # match the "$10million" signature — a false UNVERIFIED.
+    #
+    # A bare substring test is not enough: normalized text glues words
+    # to numbers, so "2%" is a substring of "12%", "5million" of
+    # "15million" and "3x" of "13x" — each used to report SUPPORTED for
+    # a page that says a different number. A match only counts when it
+    # is not the tail of a larger number (preceded by a digit or a
+    # decimal point, as in "1.73%" for a "73%" claim) and not the head
+    # of one (followed by a digit). Letters around the match are fine:
+    # normalization removed the spaces, so "growthwas73%indeed" is a
+    # genuine "73%" hit.
     norm_page = normalize_number(page_text)
-    return [n for n in numbers if n and n in norm_page]
+    matched: list[str] = []
+    for number in numbers:
+        if not number:
+            continue
+        pattern = re.compile(r"(?<![0-9.])" + re.escape(number) + r"(?![0-9])")
+        if pattern.search(norm_page):
+            matched.append(number)
+    return matched
 
 
 def verify_claim(
