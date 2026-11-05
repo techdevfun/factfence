@@ -58,7 +58,7 @@ _NUMBER_PATTERNS: list[tuple[str, re.Pattern]] = [
     ("percent", re.compile(r"\d[\d,]*(?:\.\d+)?\s?(?:%|percent(?:age)?\b)", re.IGNORECASE)),
     ("money", re.compile(r"\$\s?\d[\d,]*(?:\.\d+)?(?:\s?(?:million|billion|thousand|[mbk]))?\b", re.IGNORECASE)),
     ("big", re.compile(r"\d[\d,]*(?:\.\d+)?\s?(?:million|billion|thousand)\b", re.IGNORECASE)),
-    ("mult", re.compile(r"\d(?:\.\d+)?\s?[x×]\b|\d+(?:\.\d+)?-fold\b", re.IGNORECASE)),
+    ("mult", re.compile(r"\d[\d,]*(?:\.\d+)?\s?[x×]\b|\d+(?:\.\d+)?-fold\b", re.IGNORECASE)),
     ("ratio", re.compile(r"\d[\d,]*\s?(?:out of|/)\s?\d[\d,]*")),
     ("year", re.compile(r"\b(?:19|20)\d{2}\b")),
 ]
