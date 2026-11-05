@@ -46,6 +46,19 @@ class VerdictTest(unittest.TestCase):
         }))
         self.assertEqual(result.verdict, "SUPPORTED")
 
+    def test_supported_for_multidigit_multiplier(self):
+        # Regression: "10x"/"13x" used to extract as "0x"/"3x", so a page
+        # stating the same multiplier reported UNVERIFIED.
+        for text, page in [
+            ("Output grew 10x (https://a.example/r).", "output grew 10x last year"),
+            ("Output grew 13x (https://a.example/r).", "output grew 13x last year"),
+        ]:
+            claims = extract_claims(text)
+            result = verify_claim(claims[0], fake_fetch({
+                "https://a.example/r": ok("https://a.example/r", page),
+            }))
+            self.assertEqual(result.verdict, "SUPPORTED", text)
+
     def test_unverified(self):
         claims = extract_claims("Growth was 99.9% (https://a.example/r).")
         result = verify_claim(claims[0], fake_fetch({
