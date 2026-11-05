@@ -45,6 +45,20 @@ class NumberExtractionTest(unittest.TestCase):
         self.assertEqual(claims[0].kind, "statistic")
         self.assertIn("$4.2million", claims[0].numbers)
 
+    def test_multidigit_multiplier_statistic(self):
+        # The multiplier pattern used to match a single digit only, so
+        # "10x" was extracted as "0x" and "13x" as "3x" — and no cited
+        # page could ever support those claims.
+        for text, expected in [
+            ("Output grew 10x last year.", "10x"),
+            ("Output grew 13x last year.", "13x"),
+            ("Output grew 2.5x last year.", "2.5x"),
+        ]:
+            claims = extract_claims(text)
+            self.assertEqual(len(claims), 1, text)
+            self.assertEqual(claims[0].kind, "statistic")
+            self.assertIn(expected, claims[0].numbers, text)
+
     def test_year_alone_is_not_a_claim(self):
         self.assertEqual(extract_claims("We launched in 2024."), [])
 
