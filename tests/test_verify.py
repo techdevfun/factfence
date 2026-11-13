@@ -59,6 +59,17 @@ class VerdictTest(unittest.TestCase):
             }))
             self.assertEqual(result.verdict, "SUPPORTED", text)
 
+    def test_supported_for_paren_url(self):
+        # Regression: a cited URL with balanced parens used to be cut at
+        # the first ")", so the fetch 404d and the claim reported BROKEN.
+        url = "https://en.wikipedia.org/wiki/Python_(programming_language)"
+        claims = extract_claims(f"Usage grew 25%, see {url} for details.")
+        self.assertEqual(claims[0].citations[0].url, url)
+        result = verify_claim(claims[0], fake_fetch({
+            url: ok(url, "usage grew 25% this year"),
+        }))
+        self.assertEqual(result.verdict, "SUPPORTED")
+
     def test_unverified(self):
         claims = extract_claims("Growth was 99.9% (https://a.example/r).")
         result = verify_claim(claims[0], fake_fetch({
@@ -129,6 +140,16 @@ class IntegrationTest(unittest.TestCase):
         results = verify_claims(claims, timeout=5)
         verdicts = [r.verdict for r in results]
         self.assertEqual(verdicts, ["SUPPORTED", "UNVERIFIED", "BROKEN", "UNCITED"])
+
+    def test_end_to_end_paren_url(self):
+        # Same regression as test_supported_for_paren_url, against a real
+        # local server: the page exists and contains the number.
+        text = f"It was 25% (http://127.0.0.1:{self.port}/page_(x).html)."
+        claims = extract_claims(text)
+        self.assertEqual(claims[0].citations[0].url,
+                         f"http://127.0.0.1:{self.port}/page_(x).html")
+        results = verify_claims(claims, timeout=5)
+        self.assertEqual(results[0].verdict, "SUPPORTED")
 
 
 if __name__ == "__main__":
