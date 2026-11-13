@@ -97,6 +97,35 @@ class CitationExtractionTest(unittest.TestCase):
         claims = extract_claims(text)
         self.assertEqual(claims[0].citations[0].url, "https://example.com/r")
 
+    def test_bare_url_with_balanced_parens(self):
+        # Regression: URLs with balanced parens (e.g. Wikipedia article
+        # titles) used to be cut at the first ")", so the citation 404d
+        # and the claim was reported BROKEN.
+        claims = extract_claims(
+            "Usage grew 25%, see https://en.wikipedia.org/wiki/Python_(programming_language) for details.")
+        self.assertEqual(claims[0].citations[0].url,
+                         "https://en.wikipedia.org/wiki/Python_(programming_language)")
+        self.assertEqual(claims[0].citations[0].kind, "bare")
+
+    def test_bare_url_sentence_paren_not_kept(self):
+        # The sentence's own closing paren must not become part of the URL.
+        claims = extract_claims("Growth was 25% (see https://example.com/r).")
+        self.assertEqual(claims[0].citations[0].url, "https://example.com/r")
+
+    def test_inline_link_with_balanced_parens(self):
+        claims = extract_claims(
+            "Growth was 25% ([report](https://en.wikipedia.org/wiki/Python_(programming_language))).")
+        self.assertEqual(claims[0].citations[0].url,
+                         "https://en.wikipedia.org/wiki/Python_(programming_language)")
+        self.assertEqual(claims[0].citations[0].kind, "inline")
+
+    def test_reference_def_with_balanced_parens(self):
+        text = ("Growth was 25% [see][1].\n\n"
+                "[1]: https://en.wikipedia.org/wiki/Python_(programming_language)")
+        claims = extract_claims(text)
+        self.assertEqual(claims[0].citations[0].url,
+                         "https://en.wikipedia.org/wiki/Python_(programming_language)")
+
     def test_trailing_punctuation_stripped(self):
         claims = extract_claims("See https://example.com/r, it says 25%.")
         self.assertEqual(claims[0].citations[0].url, "https://example.com/r")
