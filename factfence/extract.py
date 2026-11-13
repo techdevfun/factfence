@@ -37,12 +37,12 @@ class Claim:
 _CODE_FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
 _INLINE_CODE_RE = re.compile(r"`[^`\n]+`")
 
-_INLINE_LINK_RE = re.compile(r"\[([^\]]*)\]\(\s*(https?://[^)\s]+)\s*\)")
+_INLINE_LINK_RE = re.compile(r"\[([^\]]*)\]\(\s*(https?://[^\s]+)\s*\)")
 _REF_LINK_RE = re.compile(r"\[([^\]]+)\]\[([^\]]*)\]")
 _REF_DEF_RE = re.compile(r"(?m)^\[([^\]]+)\]:\s*(https?://\S+)\s*$")
 _FOOTNOTE_REF_RE = re.compile(r"\[\^([^\]]+)\]")
 _FOOTNOTE_DEF_RE = re.compile(r"(?m)^\[\^([^\]]+)\]:\s*(https?://\S+)\s*$")
-_BARE_URL_RE = re.compile(r"https?://[^\s\)\]>\"']+")
+_BARE_URL_RE = re.compile(r"https?://[^\s\]>'\"]+")
 
 _NAMED_SOURCE_RE = re.compile(
     r"(?:according to|per)\s+([A-Z][\w&.'\- ]{1,60}?)(?=[,.;:!?]|$)"
@@ -103,7 +103,23 @@ def split_sentences(text: str) -> list[str]:
 
 
 def _clean_url(url: str) -> str:
-    return url.rstrip(".,;:!?\"'*)")
+    """Strip trailing sentence punctuation, keeping balanced parens.
+
+    A URL may legitimately end in ")" — Wikipedia article titles like
+    ".../Python_(programming_language)" do — so a trailing ")" is only
+    stripped when it would leave the parens unbalanced, i.e. it is the
+    sentence's closing paren rather than part of the URL.
+    """
+    while url:
+        stripped = url.rstrip(".,;:!?\"'*")
+        if stripped != url:
+            url = stripped
+            continue
+        if url.endswith(")") and url.count("(") < url.count(")"):
+            url = url[:-1]
+            continue
+        break
+    return url
 
 
 def _find_citations(sentence: str, ref_defs: dict[str, str]) -> list[Citation]:
